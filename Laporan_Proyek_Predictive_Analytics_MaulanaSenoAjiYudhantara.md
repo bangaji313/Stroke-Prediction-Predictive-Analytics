@@ -83,24 +83,46 @@ Dari visualisasi di atas, dapat disimpulkan:
 
 ## 4. Data Preparation
 
-Proses persiapan data dilakukan melalui beberapa tahapan untuk memastikan data bersih dan siap untuk pemodelan:
-1.  **Menghapus Data Tidak Relevan**: Satu baris data dengan `gender` 'Other' dihapus karena merupakan anomali dan tidak signifikan secara statistik.
-2.  **Imputasi Missing Values**: 201 nilai yang hilang pada kolom `bmi` diisi menggunakan nilai **median** dari kolom tersebut. Median dipilih karena lebih robust terhadap *outliers* dibandingkan mean.
-3.  **Encoding Fitur Kategorikal**: Fitur-fitur kategorikal (`gender`, `ever_married`, dll.) diubah menjadi format numerik menggunakan **One-Hot Encoding**.
-4.  **Penskalaan Fitur Numerik**: Seluruh fitur numerik diskalakan menggunakan **StandardScaler** agar memiliki rentang nilai yang seragam (mean 0 dan standar deviasi 1).
-5.  **Train-Test Split**: Dataset dibagi menjadi data latih (80%) dan data uji (20%) dengan `stratify=y` untuk menjaga proporsi kelas target yang tidak seimbang.
-6.  **Penanganan Ketidakseimbangan Data**: Teknik **SMOTE** (*Synthetic Minority Over-sampling Technique*) diterapkan **hanya pada data latih** untuk menyeimbangkan jumlah kelas minoritas (stroke) dan mayoritas. Ini penting untuk mencegah *data leakage*.
+Proses persiapan data dilakukan melalui beberapa tahapan untuk memastikan data bersih dan siap untuk pemodelan. Alur kerja pada tahap ini adalah sebagai berikut:
+1.  **Penghapusan Kolom Tidak Relevan**: Kolom `id` dihapus dari dataset. Kolom ini hanya berfungsi sebagai pengidentifikasi unik untuk setiap pasien dan tidak memiliki nilai prediktif apa pun terhadap variabel target, sehingga tidak akan diikutsertakan dalam proses pemodelan.
+2.  **Penanganan Anomali Data**: Satu baris data dengan `gender` 'Other' dihapus. Karena jumlahnya hanya satu, data ini dianggap sebagai anomali atau *noise* yang tidak akan memberikan kontribusi signifikan secara statistik pada model.
+3.  **Imputasi Missing Values**: Terdapat 201 nilai yang hilang pada kolom `bmi`. Nilai-nilai ini diisi (diimputasi) menggunakan nilai **median** dari kolom tersebut. Median dipilih karena lebih robust terhadap *outliers* dibandingkan dengan nilai rata-rata (mean).
+4.  **Encoding Fitur Kategorikal**: Fitur-fitur kategorikal (`gender`, `ever_married`, dll.) yang masih dalam format teks diubah menjadi representasi numerik menggunakan teknik **One-Hot Encoding**. Ini menciptakan kolom biner baru untuk setiap kategori, memungkinkan model untuk memprosesnya.
+5.  **Penskalaan Fitur Numerik**: Seluruh fitur numerik (`age`, `avg_glucose_level`, `bmi`) diskalakan menggunakan **StandardScaler**. Tujuannya adalah untuk menyeragamkan rentang nilai setiap fitur (menjadi berpusat di 0 dengan standar deviasi 1) agar fitur dengan rentang nilai besar tidak mendominasi proses pelatihan model.
+6.  **Train-Test Split**: Dataset dibagi menjadi data latih (80%) dan data uji (20%). Parameter `stratify=y` digunakan untuk memastikan proporsi kelas target (stroke dan non-stroke) tetap sama di kedua set, yang sangat penting untuk dataset yang tidak seimbang.
+7.  **Penanganan Ketidakseimbangan Data**: Teknik **SMOTE** (*Synthetic Minority Over-sampling Technique*) diterapkan **hanya pada data latih**. SMOTE bekerja dengan membuat sampel sintetis dari kelas minoritas (stroke) untuk menyeimbangkan jumlahnya dengan kelas mayoritas. Ini dilakukan setelah pembagian data untuk mencegah kebocoran data (*data leakage*).
 
 ## 5. Modeling
 
-Beberapa model machine learning dilatih dan dievaluasi untuk menemukan solusi terbaik.
+Pada tahap ini, beberapa model machine learning dilatih dan dievaluasi untuk menemukan solusi terbaik. Setiap model memiliki mekanisme kerja dan karakteristik yang berbeda.
 
-| Model | Kelebihan | Kekurangan |
-| :--- | :--- | :--- |
-| **Logistic Regression** | - Cepat dan efisien secara komputasi.<br>- Hasilnya mudah diinterpretasikan. | - Cenderung kurang akurat untuk hubungan non-linear.<br>- Rentan terhadap *underfitting*. |
-| **K-Nearest Neighbors**| - Sederhana dan mudah diimplementasikan.<br>- Efektif untuk data dengan hubungan non-linear. | - Membutuhkan banyak memori dan komputasi saat prediksi.<br>- Sangat sensitif terhadap skala fitur dan data irelevan. |
-| **Random Forest** | - Sangat akurat dan performanya kuat.<br>- Tahan terhadap *overfitting* dan dapat menangani data non-linear. | - Kurang dapat diinterpretasikan (bersifat *black box*).<br>- Membutuhkan lebih banyak sumber daya komputasi. |
-| **Support Vector Machine**| - Efektif pada data berdimensi tinggi.<br>- Efisien dalam penggunaan memori. | - Kurang efisien pada dataset yang sangat besar.<br>- Sulit diinterpretasikan dan sensitif terhadap pemilihan kernel. |
+### 5.1. Logistic Regression
+
+-   **Cara Kerja**: Logistic Regression adalah model linear yang digunakan untuk masalah klasifikasi biner. Model ini memprediksi probabilitas sebuah data termasuk dalam kelas tertentu (misalnya, kelas '1' atau 'stroke') dengan melewatkan kombinasi linear dari fitur-fitur input ke dalam fungsi logistik (sigmoid). Fungsi sigmoid akan menghasilkan nilai antara 0 dan 1, yang kemudian dapat diinterpretasikan sebagai probabilitas.
+-   **Parameter yang Digunakan**: `random_state=42` untuk memastikan reproduktifitas hasil. Parameter lainnya menggunakan nilai default dari library scikit-learn.
+-   **Kelebihan**: Cepat, efisien secara komputasi, dan hasilnya mudah diinterpretasikan.
+-   **Kekurangan**: Cenderung kurang akurat jika hubungan antara fitur dan target bersifat non-linear, serta rentan terhadap *underfitting*.
+
+### 5.2. K-Nearest Neighbors (KNN)
+
+-   **Cara Kerja**: KNN adalah algoritma non-parametrik yang mengklasifikasikan data baru berdasarkan mayoritas kelas dari 'k' tetangga terdekatnya di ruang fitur. Jarak antar data dihitung menggunakan metrik tertentu (misalnya, Jarak Euclidean). Saat memprediksi, algoritma akan mencari 'k' sampel data latih yang paling mirip (paling dekat) dengan data baru, lalu menentukan kelasnya berdasarkan voting mayoritas dari tetangga-tetangga tersebut.
+-   **Parameter yang Digunakan**: Menggunakan parameter default dari scikit-learn, di antaranya `n_neighbors=5`.
+-   **Kelebihan**: Sederhana, mudah diimplementasikan, dan efektif untuk data dengan hubungan non-linear.
+-   **Kekurangan**: Membutuhkan banyak memori dan komputasi saat prediksi (karena harus menghitung jarak ke semua data latih), serta sangat sensitif terhadap skala fitur.
+
+### 5.3. Random Forest
+
+-   **Cara Kerja**: Random Forest adalah model *ensemble* yang terdiri dari banyak *decision tree* (pohon keputusan). Setiap pohon dalam "hutan" ini dilatih pada sampel acak dari dataset (*bootstrap sample*). Saat membuat prediksi, setiap pohon memberikan prediksinya masing-masing, dan hasil akhir ditentukan oleh voting mayoritas dari semua pohon. Pendekatan ini membantu mengurangi *overfitting* yang sering terjadi pada satu *decision tree* dan meningkatkan akurasi model secara keseluruhan.
+-   **Parameter yang Digunakan**: `random_state=42` untuk memastikan proses acak dalam pembuatan pohon dapat direproduksi. Parameter lainnya menggunakan nilai default.
+-   **Kelebihan**: Sangat akurat, performanya kuat, tahan terhadap *overfitting*, dan dapat menangani hubungan non-linear dengan baik.
+-   **Kekurangan**: Kurang dapat diinterpretasikan (bersifat *black box*) dan membutuhkan lebih banyak sumber daya komputasi dibandingkan model tunggal.
+
+### 5.4. Support Vector Machine (SVM)
+
+-   **Cara Kerja**: SVM bekerja dengan mencari *hyperplane* (atau garis pemisah) optimal yang dapat memisahkan data ke dalam kelas-kelas yang berbeda. Tujuannya adalah untuk menemukan *hyperplane* dengan margin (jarak) terbesar antara titik data terdekat dari setiap kelas (disebut *support vectors*). Dengan memaksimalkan margin, SVM dapat menghasilkan batas keputusan yang jelas dan memiliki kemampuan generalisasi yang baik.
+-   **Parameter yang Digunakan**: `random_state=42` untuk reproduktifitas. Parameter lainnya menggunakan nilai default dari scikit-learn.
+-   **Kelebihan**: Sangat efektif pada data berdimensi tinggi dan efisien dalam penggunaan memori karena hanya menggunakan subset titik data (support vectors).
+-   **Kekurangan**: Kurang efisien pada dataset yang sangat besar dan bisa jadi sulit diinterpretasikan.
 
 Setelah melatih keempat model pada data latih yang telah diproses, performa mereka dievaluasi pada data uji.
 
