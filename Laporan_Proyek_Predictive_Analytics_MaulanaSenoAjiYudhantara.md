@@ -156,4 +156,4 @@ Berdasarkan hasil evaluasi, **Logistic Regression dipilih sebagai model terbaik*
 Meskipun Random Forest memiliki akurasi tertinggi, performa **Recall-nya sangat buruk (0.10)**, yang berarti model ini gagal mengidentifikasi 90% pasien stroke. Sebaliknya, **Logistic Regression** berhasil mencapai **Recall sebesar 0.80**, yang berarti model ini mampu mendeteksi 80% dari total kasus stroke pada data uji. Kemampuannya untuk meminimalkan *False Negative* menjadikannya pilihan yang paling aman dan paling bertanggung jawab untuk aplikasi di dunia nyata dalam konteks medis, meskipun harus mengorbankan presisi.
 
 ## 7. Daftar Referensi
-World Health Organization. (2024). _Stroke, cerebrovascular accident_. WHO. [https://www.who.int/news-room/fact-sheets/detail/stroke-cerebrovascular-accident](https://www.emro.who.int/health-topics/stroke-cerebrovascular-accident/index.html)
+World Health Organization. (2025). _Stroke, cerebrovascular accident_. WHO. [https://www.who.int/news-room/fact-sheets/detail/stroke-cerebrovascular-accident](https://www.emro.who.int/health-topics/stroke-cerebrovascular-accident/index.html)
