@@ -71,6 +71,7 @@ Pada tahap EDA, beberapa temuan kunci berhasil diidentifikasi melalui serangkaia
 *Gambar 3. Perbandingan distribusi fitur numerik antara pasien stroke dan non-stroke.*
 
 ![Heatmap Korelasi](images/heatmap_korelasi.png)
+
 *Gambar 4. Heatmap korelasi antar fitur numerik.*
 
 Dari visualisasi di atas, dapat disimpulkan:
